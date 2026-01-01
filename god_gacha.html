@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⛩️神様ガチャ⛩️</title>
+    <title>豪華絢爛 神様ガチャ</title>
     <style>
         :root {
             --ur-gradient: linear-gradient(45deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff);
             --ssr-gold: #ffd700;
             --sr-silver: #c0c0c0;
         }
+
         body {
             font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
             background-color: #000;
@@ -26,126 +28,372 @@
             border-bottom: 3px solid #ffd700;
         }
 
-        .controls { margin: 20px 0; display: flex; justify-content: center; gap: 15px; }
-        
-        button {
-            border: none; padding: 15px; font-size: 1rem; font-weight: bold;
-            border-radius: 8px; cursor: pointer; flex: 1; max-width: 160px;
-            font-family: serif; transition: 0.3s;
+        /* コントロールエリア：バッジが見切れないように少し余白調整 */
+        .controls {
+            margin: 30px 0 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
         }
-        .btn-single { background: #eee; color: #333; box-shadow: 0 5px 0 #999; }
-        .btn-multi { background: linear-gradient(45deg, #bf953f, #fcf6ba, #aa771c); color: #432; box-shadow: 0 5px 0 #874; }
-        button:disabled { opacity: 0.5; filter: grayscale(1); }
 
-        /* 結果一覧のスタイル */
-        #results {
-            display: grid; grid-template-columns: repeat(5, 1fr);
-            gap: 10px; max-width: 600px; margin: 20px auto; padding: 10px;
+        button {
+            border: none;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            flex: 1;
+            max-width: 160px;
+            font-family: serif;
+            transition: 0.3s;
+            position: relative;
         }
+
+        /* 単発ボタン */
+        .btn-single {
+            background: #eee;
+            color: #333;
+            box-shadow: 0 4px 0 #999;
+        }
+
+        /* 10連ボタン（超豪華仕様） */
+        .btn-multi {
+            /* 流れる黄金グラデーション */
+            background: linear-gradient(120deg, #ff8c00, #ffd700, #ff8c00, #ffd700);
+            background-size: 200% 200%;
+            color: #520;
+            border: 2px solid #fff;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 4px 0 #b86b00;
+            animation: goldFlow 3s linear infinite;
+            /* グラデーションを動かす */
+            overflow: visible;
+            /* バッジをはみ出させる */
+        }
+
+        /* グラデーション移動アニメーション */
+        @keyframes goldFlow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* 「SSR以上確定」バッジ */
+        .btn-multi::after {
+            content: "SSR以上確定!";
+            position: absolute;
+            top: -18px;
+            right: -10px;
+            background: linear-gradient(to bottom, #ff0055, #cc0033);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+            transform: rotate(5deg);
+            animation: badgeBounce 0.8s infinite alternate ease-in-out;
+            z-index: 10;
+        }
+
+        /* バッジのフワフワ動き */
+        @keyframes badgeBounce {
+            from {
+                transform: rotate(5deg) translateY(0) scale(1);
+            }
+
+            to {
+                transform: rotate(5deg) translateY(-5px) scale(1.1);
+            }
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            filter: grayscale(1);
+            animation: none;
+        }
+
+        button:disabled::after {
+            display: none;
+        }
+
+        /* 無効時はバッジを消す */
+
+
+        /* 結果一覧 */
+        #results {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
         .card {
-            background: #222; border-radius: 5px; overflow: hidden;
-            position: relative; aspect-ratio: 2/3; cursor: pointer;
+            background: #222;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 2/3;
+            cursor: pointer;
             transition: transform 0.2s;
         }
-        .card img { width: 100%; height: 70%; object-fit: cover; pointer-events: none; }
-        .card-body { padding: 4px; font-size: 0.6rem; pointer-events: none; }
 
-        /* --- レアリティ別：一覧画面のエフェクト --- */
+        .card img {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .card-body {
+            padding: 4px;
+            font-size: 0.6rem;
+            pointer-events: none;
+        }
+
+        /* レアリティ別：一覧画面の明滅エフェクト */
         .card.UR {
             border: 2px solid #ff00ff;
             animation: ur-blink 3s infinite;
         }
+
         @keyframes ur-blink {
-            0%, 100% { border-color: #ff00ff; box-shadow: 0 0 5px #ff00ff; }
-            33% { border-color: #00ffff; box-shadow: 0 0 15px #00ffff; }
-            66% { border-color: #ffff00; box-shadow: 0 0 5px #ffff00; }
+
+            0%,
+            100% {
+                border-color: #ff00ff;
+                box-shadow: 0 0 5px #ff00ff;
+            }
+
+            33% {
+                border-color: #00ffff;
+                box-shadow: 0 0 15px #00ffff;
+            }
+
+            66% {
+                border-color: #ffff00;
+                box-shadow: 0 0 5px #ffff00;
+            }
         }
 
         .card.SSR {
             border: 2px solid var(--ssr-gold);
             animation: ssr-blink 2s infinite alternate;
         }
+
         @keyframes ssr-blink {
-            from { box-shadow: 0 0 2px var(--ssr-gold); opacity: 0.8; }
-            to { box-shadow: 0 0 12px var(--ssr-gold); opacity: 1; }
+            from {
+                box-shadow: 0 0 2px var(--ssr-gold);
+                opacity: 0.8;
+            }
+
+            to {
+                box-shadow: 0 0 12px var(--ssr-gold);
+                opacity: 1;
+            }
         }
 
         .card.SR {
             border: 2px solid var(--sr-silver);
-            box-shadow: 0 0 4px rgba(255,255,255,0.3);
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
         }
-        .card.R, .card.N { border: 1px solid #444; }
 
-        /* --- 演出用レイヤー --- */
+        .card.R,
+        .card.N {
+            border: 1px solid #444;
+        }
+
+        /* 祈祷演出 */
         #overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: none;
-            flex-direction: column; align-items: center; justify-content: center; z-index: 500;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
         }
-        .prayer-text {
-            font-size: 2rem; color: #ffd700; font-weight: bold;
-            text-shadow: 0 0 20px #ff0000; animation: pulse 1s infinite alternate;
-        }
-        @keyframes pulse { from { transform: scale(1); opacity: 0.6; } to { transform: scale(1.1); opacity: 1; } }
 
-        /* じわじわ光る溜め演出 */
-        #flash-screen {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            z-index: 1500; pointer-events: none; opacity: 0;
+        .prayer-text {
+            font-size: 2rem;
+            color: #ffd700;
+            font-weight: bold;
+            animation: pulse 1s infinite alternate;
         }
-        .charge-ssr { animation: chargeWhite 1.5s ease-in forwards; }
-        .charge-ur { animation: chargeRainbow 2.5s ease-in forwards; }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            to {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        /* 焦らし演出 */
+        #flash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1500;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .charge-ssr {
+            animation: chargeWhite 1.5s ease-in forwards;
+        }
+
+        .charge-ur {
+            animation: chargeRainbow 2.5s ease-in forwards;
+        }
 
         @keyframes chargeWhite {
-            0% { opacity: 0; background: #fff; }
-            100% { opacity: 1; background: #fff; }
+            0% {
+                opacity: 0;
+                background: #fff;
+            }
+
+            100% {
+                opacity: 1;
+                background: #fff;
+            }
         }
+
         @keyframes chargeRainbow {
-            0% { opacity: 0; background: #000; }
-            50% { opacity: 0.5; background: var(--ur-gradient); }
-            100% { opacity: 1; background: #fff; }
+            0% {
+                opacity: 0;
+                background: #000;
+            }
+
+            50% {
+                opacity: 0.5;
+                background: var(--ur-gradient);
+            }
+
+            100% {
+                opacity: 1;
+                background: #fff;
+            }
         }
 
-        /* ピックアップ表示（全面タップで閉じる） */
+        /* ピックアップ表示 */
         #pickup-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1000; display: none; background: rgba(0,0,0,0.85);
-            align-items: center; justify-content: center; cursor: pointer;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: none;
+            background: rgba(0, 0, 0, 0.85);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
         }
 
-        /* UR特殊：回転後光 */
         .gokou-wrap {
-            position: absolute; width: 100%; height: 100%; overflow: hidden;
-            display: flex; align-items: center; justify-content: center; z-index: -1;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: -1;
+            pointer-events: none;
         }
+
         .gokou {
-            width: 1500px; height: 1500px;
-            background: repeating-conic-gradient(from 0deg, 
-                transparent 0deg 15deg, rgba(255,215,0,0.2) 15deg 30deg);
-            animation: rotate 15s linear infinite;
+            position: absolute;
+            width: 250vmax;
+            height: 250vmax;
+            background: repeating-conic-gradient(from 0deg,
+                    transparent 0deg 10deg, rgba(255, 215, 0, 0.2) 10deg 20deg);
+            animation: rotateGokou 20s linear infinite;
+            transform-origin: center center;
         }
+
         .particles {
-            position: absolute; width: 100%; height: 100%;
-            background-image: radial-gradient(circle, #fff 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: particleMove 3s linear infinite;
-            opacity: 0.4;
+            position: absolute;
+            width: 200vmax;
+            height: 200vmax;
+            background-image: radial-gradient(circle, #fff 1.5px, transparent 1.5px);
+            background-size: 60px 60px;
+            animation: particleMove 4s linear infinite;
+            opacity: 0.5;
         }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes particleMove { from { background-position: 0 0; } to { background-position: 50px 100px; } }
+
+        @keyframes rotateGokou {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes particleMove {
+            from {
+                transform: translate(-10%, -10%);
+            }
+
+            to {
+                transform: translate(0%, 0%);
+            }
+        }
 
         .pickup-card {
-            width: 300px; background: #fff; border-radius: 15px; overflow: hidden;
-            color: #333; position: relative; box-shadow: 0 0 50px rgba(0,0,0,1);
+            width: 300px;
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            color: #333;
+            position: relative;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 1);
             animation: cardReveal 0.6s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards;
-            pointer-events: none; /* 親のクリックを通すため */
+            pointer-events: none;
         }
+
         @keyframes cardReveal {
-            0% { transform: scale(0) rotate(-20deg); opacity: 0; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            0% {
+                transform: scale(0) rotate(-20deg);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <header>
@@ -160,75 +408,77 @@
 
     <div id="results"></div>
 
-    <div id="overlay"><div class="prayer-text" id="prayerText">神 託 待 機 中 . . .</div></div>
+    <div id="overlay">
+        <div class="prayer-text" id="prayerText">神 託 待 機 中 . . .</div>
+    </div>
     <div id="flash-screen"></div>
     <div id="pickup-container" onclick="closePickup()"></div>
 
     <script>
-        // -----------------------
-        // データ定義 (全50体)
-        // -----------------------
-        const godDB = [
-            // --- UR (3体) ---
-            { name: "天照大御神", title: "最高神", rarity: "UR", color: "#ff9800", imgText:"☀", image: "img/amaterasu.png", desc: "日本の総氏神。最高の運気。" },
-            { name: "月読命", title: "夜の統治者", rarity: "UR", color: "#673ab7", imgText:"☾", image: "img/tukuyomi.png", desc: "静寂とツキを呼び込む。" },
-            { name: "伊邪那岐命", title: "国生みの父", rarity: "UR", color: "#2196f3", imgText:"父", image: "img/izanaginomikoto.png", desc: "万物の根源。絶大な開拓力。" },
+            // -----------------------
+            // データ定義 (全50体)
+            // -----------------------
+            const godDB = [
+                // --- UR (3体) ---
+                { name: "天照大御神", title: "最高神", rarity: "UR", color: "#ff9800", imgText: "☀", image: "img/amaterasu.png", desc: "日本の総氏神。最高の運気。" },
+                { name: "月読命", title: "夜の統治者", rarity: "UR", color: "#673ab7", imgText: "☾", image: "img/tukuyomi.png", desc: "静寂とツキを呼び込む。" },
+                { name: "伊邪那岐命", title: "国生みの父", rarity: "UR", color: "#2196f3", imgText: "父", image: "img/izanaginomikoto.png", desc: "万物の根源。絶大な開拓力。" },
 
-            // --- SSR (4体) ---
-            { name: "須佐之男命", title: "英雄神", rarity: "SSR", color: "#f44336", imgText:"剣", image: "img/susanounomikoto.png", desc: "厄払いの最強格。" },
-            { name: "菅原道真公", title: "学問の神", rarity: "SSR", color: "#9c27b0", imgText:"梅", image: "img/sugawaranomitizanekou.png", desc: "合格・昇進の絶対守護。" },
-            { name: "宇迦之御魂神", title: "お稲荷様", rarity: "SSR", color: "#ff5722", imgText:"稲", image: "img/ukanomitamanokami.png", desc: "商売繁盛・金運の最高峰。" },
-            { name: "建御雷神", title: "武神", rarity: "SSR", color: "#795548", imgText:"雷", image: "img/takemikaduti.png", desc: "勝負に勝つ圧倒的武力。" },
+                // --- SSR (4体) ---
+                { name: "須佐之男命", title: "英雄神", rarity: "SSR", color: "#f44336", imgText: "剣", image: "img/susanounomikoto.png", desc: "厄払いの最強格。" },
+                { name: "菅原道真公", title: "学問の神", rarity: "SSR", color: "#9c27b0", imgText: "梅", image: "img/sugawaranomitizanekou.png", desc: "合格・昇進の絶対守護。" },
+                { name: "宇迦之御魂神", title: "お稲荷様", rarity: "SSR", color: "#ff5722", imgText: "稲", image: "img/ukanomitamanokami.png", desc: "商売繁盛・金運の最高峰。" },
+                { name: "建御雷神", title: "武神", rarity: "SSR", color: "#795548", imgText: "雷", image: "img/takemikaduti.png", desc: "勝負に勝つ圧倒的武力。" },
 
-            // --- SR (8体) ---
-            { name: "木花咲耶姫", title: "富士の女神", rarity: "SR", color: "#e91e63", imgText:"桜", image: "img/konohanasakuyahime.png", desc: "美と安産の象徴。" },
-            { name: "猿田彦大神", title: "導きの神", rarity: "SR", color: "#607d8b", imgText:"道", image: "img/sarutahikooukami.png", desc: "正しい道へ導く。" },
-            { name: "市杵島姫命", title: "弁財天", rarity: "SR", color: "#00bcd4", imgText:"琵", image: "img/itikishimahime.png", desc: "芸能・金運・水。" },
-            { name: "天宇受売命", title: "芸能の神", rarity: "SR", color: "#e91e63", imgText:"舞", image: "img/amenouzumenomikoto.png", desc: "人気運と笑いを招く。" },
-            { name: "事代主神", title: "恵比寿", rarity: "SR", color: "#03a9f4", imgText:"鯛", image: "img/kotoshironushinokami.png", desc: "大漁・福徳の神。" },
-            { name: "大山咋神", title: "山の神", rarity: "SR", color: "#4caf50", imgText:"山", image: "img/ouyamakuinokami.png", desc: "家運隆昌・酒造。" },
-            { name: "火之迦具土神", title: "火の神", rarity: "SR", color: "#d84315", imgText:"火", image: "img/hinokagututinokami.png", desc: "火伏せ・エネルギー。" },
-            { name: "大物主大神", title: "大神神社の神", rarity: "SR", color: "#3e2723", imgText:"蛇", image: "img/oumononushinokami.png", desc: "医薬・酒・強力な守護。" },
+                // --- SR (8体) ---
+                { name: "木花咲耶姫", title: "富士の女神", rarity: "SR", color: "#e91e63", imgText: "桜", image: "img/konohanasakuyahime.png", desc: "美と安産の象徴。" },
+                { name: "猿田彦大神", title: "導きの神", rarity: "SR", color: "#607d8b", imgText: "道", image: "img/sarutahikooukami.png", desc: "正しい道へ導く。" },
+                { name: "市杵島姫命", title: "弁財天", rarity: "SR", color: "#00bcd4", imgText: "琵", image: "img/itikishimahime.png", desc: "芸能・金運・水。" },
+                { name: "天宇受売命", title: "芸能の神", rarity: "SR", color: "#e91e63", imgText: "舞", image: "img/amenouzumenomikoto.png", desc: "人気運と笑いを招く。" },
+                { name: "事代主神", title: "恵比寿", rarity: "SR", color: "#03a9f4", imgText: "鯛", image: "img/kotoshironushinokami.png", desc: "大漁・福徳の神。" },
+                { name: "大山咋神", title: "山の神", rarity: "SR", color: "#4caf50", imgText: "山", image: "img/ouyamakuinokami.png", desc: "家運隆昌・酒造。" },
+                { name: "火之迦具土神", title: "火の神", rarity: "SR", color: "#d84315", imgText: "火", image: "img/hinokagututinokami.png", desc: "火伏せ・エネルギー。" },
+                { name: "大物主大神", title: "大神神社の神", rarity: "SR", color: "#3e2723", imgText: "蛇", image: "img/oumononushinokami.png", desc: "医薬・酒・強力な守護。" },
 
-            // --- R (15体) ---
-            { name: "氏神様", title: "地元の神", rarity: "R", color: "#8bc34a", imgText:"氏", image: "img/uzigami.jpg", desc: "地域を守る一番身近な神。" },
-            { name: "お地蔵様", title: "子供の守護", rarity: "R", color: "#9e9e9e", imgText:"蔵", image: "img/ozizou.png", desc: "日常の災難除け。" },
-            { name: "道祖神", title: "旅の神", rarity: "R", color: "#795548", imgText:"旅", image: "img/dousozin.jpeg", desc: "交通安全・村の守り。" },
-            { name: "金山彦神", title: "金属の神", rarity: "R", color: "#ffc107", imgText:"金", image: "img/kanayamahikonokami.jpg", desc: "鉱業・金物の守護。" },
-            { name: "水波能売命", title: "水の神", rarity: "R", color: "#2196f3", imgText:"水", image: "img/miduhanome.png", desc: "井戸・水回りの安全。" },
-            { name: "塩土老翁", title: "製塩の神", rarity: "R", color: "#607d8b", imgText:"潮", image: "img/shiotutiozi.png", desc: "製塩・導き。" },
-            { name: "少彦名神", title: "医薬の神", rarity: "R", color: "#4caf50", imgText:"薬", image: "img/sukunabikona.jpg", desc: "病気平癒・温泉。" },
-            { name: "大年神", title: "お正月の神", rarity: "R", color: "#ffeb3b", imgText:"年", image: "img/outoshinokami.jpg", desc: "一年の幸福をもたらす。" },
-            { name: "面足尊", title: "美男美女の神", rarity: "R", color: "#e91e63", imgText:"顔", image: "img/omodaru.png", desc: "美容・整形の守護。" },
-            { name: "久久能智神", title: "木の神", rarity: "R", color: "#8d6e63", imgText:"木", image: "img/kugututi.png", desc: "林業・建築の守護。" },
-            { name: "天手力男神", title: "剛力の神", rarity: "R", color: "#3e2723", imgText:"力", image: "img/amenotadikarawo.png", desc: "スポーツ・力仕事。" },
-            { name: "八咫烏", title: "導きの鳥", rarity: "R", color: "#000", imgText:"烏", image: "img/yatagarasu.jpg", desc: "勝利へのナビゲーター。" },
-            { name: "風神", title: "風を司る", rarity: "R", color: "#009688", imgText:"風", image: "img/huuzin.png", desc: "風雨順時。" },
-            { name: "雷神", title: "雷を司る", rarity: "R", color: "#ffeb3b", imgText:"⚡", image: "img/raizin.png", desc: "雷除け・農業。" },
-            { name: "磐長姫", title: "岩の神", rarity: "R", color: "#607d8b", imgText:"岩", image: "img/iwanagahime.png", desc: "長寿・縁切りの力。" },
+                // --- R (15体) ---
+                { name: "氏神様", title: "地元の神", rarity: "R", color: "#8bc34a", imgText: "氏", image: "img/uzigami.jpg", desc: "地域を守る一番身近な神。" },
+                { name: "お地蔵様", title: "子供の守護", rarity: "R", color: "#9e9e9e", imgText: "蔵", image: "img/ozizou.png", desc: "日常の災難除け。" },
+                { name: "道祖神", title: "旅の神", rarity: "R", color: "#795548", imgText: "旅", image: "img/dousozin.jpeg", desc: "交通安全・村の守り。" },
+                { name: "金山彦神", title: "金属の神", rarity: "R", color: "#ffc107", imgText: "金", image: "img/kanayamahikonokami.jpg", desc: "鉱業・金物の守護。" },
+                { name: "水波能売命", title: "水の神", rarity: "R", color: "#2196f3", imgText: "水", image: "img/miduhanome.png", desc: "井戸・水回りの安全。" },
+                { name: "塩土老翁", title: "製塩の神", rarity: "R", color: "#607d8b", imgText: "潮", image: "img/shiotutiozi.png", desc: "製塩・導き。" },
+                { name: "少彦名神", title: "医薬の神", rarity: "R", color: "#4caf50", imgText: "薬", image: "img/sukunabikona.jpg", desc: "病気平癒・温泉。" },
+                { name: "大年神", title: "お正月の神", rarity: "R", color: "#ffeb3b", imgText: "年", image: "img/outoshinokami.jpg", desc: "一年の幸福をもたらす。" },
+                { name: "面足尊", title: "美男美女の神", rarity: "R", color: "#e91e63", imgText: "顔", image: "img/omodaru.png", desc: "美容・整形の守護。" },
+                { name: "久久能智神", title: "木の神", rarity: "R", color: "#8d6e63", imgText: "木", image: "img/kugututi.png", desc: "林業・建築の守護。" },
+                { name: "天手力男神", title: "剛力の神", rarity: "R", color: "#3e2723", imgText: "力", image: "img/amenotadikarawo.png", desc: "スポーツ・力仕事。" },
+                { name: "八咫烏", title: "導きの鳥", rarity: "R", color: "#000", imgText: "烏", image: "img/yatagarasu.jpg", desc: "勝利へのナビゲーター。" },
+                { name: "風神", title: "風を司る", rarity: "R", color: "#009688", imgText: "風", image: "img/huuzin.png", desc: "風雨順時。" },
+                { name: "雷神", title: "雷を司る", rarity: "R", color: "#ffeb3b", imgText: "⚡", image: "img/raizin.png", desc: "雷除け・農業。" },
+                { name: "磐長姫", title: "岩の神", rarity: "R", color: "#607d8b", imgText: "岩", image: "img/iwanagahime.png", desc: "長寿・縁切りの力。" },
 
-            // --- N (20体) [神の使い、神具、妖怪など] ---
-            { name: "狛犬(阿)", title: "神社の守護獣", rarity: "N", color: "#bcaaa4", imgText:"阿", image: "img/komainu_a.png", desc: "入り口で邪気を防ぐ。" },
-            { name: "狛犬(吽)", title: "神社の守護獣", rarity: "N", color: "#bcaaa4", imgText:"吽", image: "img/komainu_un.png", desc: "口を閉じて智慧を示す。" },
-            { name: "神主さん", title: "神職", rarity: "N", color: "#eeeeee", imgText:"主", image: "img/kannushi.png", desc: "祝詞を奏上する人。" },
-            { name: "巫女さん", title: "神職", rarity: "N", color: "#ffcdd2", imgText:"巫", image: "img/miko.png", desc: "神楽を舞う補佐役。" },
-            { name: "河童", title: "水辺の妖怪", rarity: "N", color: "#4caf50", imgText:"皿", image: "img/kappa.png", desc: "きゅうりが好き。相撲が得意。" },
-            { name: "天狗", title: "山の妖怪", rarity: "N", color: "#d32f2f", imgText:"狗", image: "img/tengu.png", desc: "慢心に注意。" },
-            { name: "白蛇", title: "神の使い", rarity: "N", color: "#fff", imgText:"巳", image: "img/shirohebi.png", desc: "金運の兆しかもしれない。" },
-            { name: "眷属の狐", title: "稲荷の使い", rarity: "N", color: "#ffcc80", imgText:"狐", image: "img/kitsune.png", desc: "油揚げを待っている。" },
-            { name: "賽銭箱", title: "設備", rarity: "N", color: "#8d6e63", imgText:"銭", image: "img/saisenbako.png", desc: "5円玉を入れる箱。" },
-            { name: "鈴緒", title: "設備", rarity: "N", color: "#f44336", imgText:"紐", image: "img/suzuo.png", desc: "ガラガラ鳴らす太い紐。" },
-            { name: "御朱印帳", title: "アイテム", rarity: "N", color: "#673ab7", imgText:"印", image: "img/goshuintyou.png", desc: "参拝の記録帳。" },
-            { name: "おみくじ(吉)", title: "運勢", rarity: "N", color: "#fff", imgText:"吉", image: "img/kichi.png", desc: "まあまあの運勢。" },
-            { name: "おみくじ(凶)", title: "運勢", rarity: "N", color: "#424242", imgText:"凶", image: "img/kyou.png", desc: "木に結んで帰ろう。" },
-            { name: "破魔矢", title: "授与品", rarity: "N", color: "#f44336", imgText:"矢", image: "img/hamaya.png", desc: "魔を破る縁起物。" },
-            { name: "絵馬", title: "奉納品", rarity: "N", color: "#ffca28", imgText:"馬", image: "img/ema.png", desc: "願い事を書く板。" },
-            { name: "境内の鳩", title: "動物", rarity: "N", color: "#90a4ae", imgText:"鳩", image: "img/hato.png", desc: "豆を狙っている。" },
-            { name: "参道の砂利", title: "環境", rarity: "N", color: "#cfd8dc", imgText:"石", image: "img/zyari.png", desc: "歩くとジャリジャリいう。" },
-            { name: "提灯お化け", title: "妖怪", rarity: "N", color: "#ff5722", imgText:"灯", image: "img/tyouchinobake.png", desc: "古い提灯の付喪神。" },
-            { name: "唐傘お化け", title: "妖怪", rarity: "N", color: "#9c27b0", imgText:"傘", image: "img/karakasaobake.png", desc: "一本足で跳ねる。" },
-            { name: "貧乏神", title: "厄介者", rarity: "N", color: "#5d4037", imgText:"貧", image: "img/binbougami.png", desc: "早く出ていってもらおう。" },
-        ];
+                // --- N (20体) [神の使い、神具、妖怪など] ---
+                { name: "狛犬(阿)", title: "神社の守護獣", rarity: "N", color: "#bcaaa4", imgText: "阿", image: "img/komainu_a.png", desc: "入り口で邪気を防ぐ。" },
+                { name: "狛犬(吽)", title: "神社の守護獣", rarity: "N", color: "#bcaaa4", imgText: "吽", image: "img/komainu_un.png", desc: "口を閉じて智慧を示す。" },
+                { name: "神主さん", title: "神職", rarity: "N", color: "#eeeeee", imgText: "主", image: "img/kannushi.png", desc: "祝詞を奏上する人。" },
+                { name: "巫女さん", title: "神職", rarity: "N", color: "#ffcdd2", imgText: "巫", image: "img/miko.png", desc: "神楽を舞う補佐役。" },
+                { name: "河童", title: "水辺の妖怪", rarity: "N", color: "#4caf50", imgText: "皿", image: "img/kappa.png", desc: "きゅうりが好き。相撲が得意。" },
+                { name: "天狗", title: "山の妖怪", rarity: "N", color: "#d32f2f", imgText: "狗", image: "img/tengu.png", desc: "慢心に注意。" },
+                { name: "白蛇", title: "神の使い", rarity: "N", color: "#fff", imgText: "巳", image: "img/shirohebi.png", desc: "金運の兆しかもしれない。" },
+                { name: "眷属の狐", title: "稲荷の使い", rarity: "N", color: "#ffcc80", imgText: "狐", image: "img/kitsune.png", desc: "油揚げを待っている。" },
+                { name: "賽銭箱", title: "設備", rarity: "N", color: "#8d6e63", imgText: "銭", image: "img/saisenbako.png", desc: "5円玉を入れる箱。" },
+                { name: "鈴緒", title: "設備", rarity: "N", color: "#f44336", imgText: "紐", image: "img/suzuo.png", desc: "ガラガラ鳴らす太い紐。" },
+                { name: "御朱印帳", title: "アイテム", rarity: "N", color: "#673ab7", imgText: "印", image: "img/goshuintyou.png", desc: "参拝の記録帳。" },
+                { name: "おみくじ(吉)", title: "運勢", rarity: "N", color: "#fff", imgText: "吉", image: "img/kichi.png", desc: "まあまあの運勢。" },
+                { name: "おみくじ(凶)", title: "運勢", rarity: "N", color: "#424242", imgText: "凶", image: "img/kyou.png", desc: "木に結んで帰ろう。" },
+                { name: "破魔矢", title: "授与品", rarity: "N", color: "#f44336", imgText: "矢", image: "img/hamaya.png", desc: "魔を破る縁起物。" },
+                { name: "絵馬", title: "奉納品", rarity: "N", color: "#ffca28", imgText: "馬", image: "img/ema.png", desc: "願い事を書く板。" },
+                { name: "境内の鳩", title: "動物", rarity: "N", color: "#90a4ae", imgText: "鳩", image: "img/hato.png", desc: "豆を狙っている。" },
+                { name: "参道の砂利", title: "環境", rarity: "N", color: "#cfd8dc", imgText: "石", image: "img/zyari.png", desc: "歩くとジャリジャリいう。" },
+                { name: "提灯お化け", title: "妖怪", rarity: "N", color: "#ff5722", imgText: "灯", image: "img/tyouchinobake.png", desc: "古い提灯の付喪神。" },
+                { name: "唐傘お化け", title: "妖怪", rarity: "N", color: "#9c27b0", imgText: "傘", image: "img/karakasaobake.png", desc: "一本足で跳ねる。" },
+                { name: "貧乏神", title: "厄介者", rarity: "N", color: "#5d4037", imgText: "貧", image: "img/binbougami.png", desc: "早く出ていってもらおう。" },
+            ];
 
         const wait = ms => new Promise(res => setTimeout(res, ms));
         let resolvePickup;
@@ -240,15 +490,15 @@
             resultsDiv.innerHTML = "";
 
             let results = [];
-            for(let i=0; i<count; i++) {
+            for (let i = 0; i < count; i++) {
                 let r = Math.random() * 100;
-                let rarity = r<3?"UR":r<10?"SSR":r<25?"SR":r<50?"R":"N";
-                if(count===10 && i===9 && !results.some(x=>x.rarity==="SSR"||x.rarity==="UR")) {
-                    rarity = Math.random()<0.3?"UR":"SSR";
+                let rarity = r < 3 ? "UR" : r < 10 ? "SSR" : r < 25 ? "SR" : r < 50 ? "R" : "N";
+                if (count === 10 && i === 9 && !results.some(x => x.rarity === "SSR" || x.rarity === "UR")) {
+                    rarity = Math.random() < 0.3 ? "UR" : "SSR";
                 }
                 const pool = godDB.filter(g => g.rarity === rarity);
-                const char = pool.length > 0 ? pool[Math.floor(Math.random()*pool.length)] : godDB[0];
-                results.push({...char});
+                const char = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : godDB[0];
+                results.push({ ...char });
             }
 
             // 2. 演出：祈祷（溜め）
@@ -259,11 +509,11 @@
             pText.innerText = "一礼..."; await wait(600);
             overlay.style.display = "none";
 
-            for(let char of results) {
+            for (let char of results) {
                 await showPickup演出(char);
             }
 
-            for(let char of results) {
+            for (let char of results) {
                 const card = document.createElement("div");
                 card.className = `card ${char.rarity}`;
                 card.innerHTML = `<img src="${char.image}" onerror="this.src='https://placehold.jp/20/444/fff/100x100.png?text=神'"><div class="card-body"><b>${char.rarity}</b><br>${char.name}</div>`;
@@ -279,11 +529,11 @@
             const container = document.getElementById("pickup-container");
             const flash = document.getElementById("flash-screen");
 
-            if(!isManual) {
-                if(char.rarity === "UR") {
+            if (!isManual) {
+                if (char.rarity === "UR") {
                     flash.className = "charge-ur";
                     await wait(2500);
-                } else if(char.rarity === "SSR") {
+                } else if (char.rarity === "SSR") {
                     flash.className = "charge-ssr";
                     await wait(1500);
                 }
@@ -292,17 +542,17 @@
             }
 
             let effectHtml = "";
-            if(char.rarity === "UR") {
-                effectHtml = `<div class="gokou-wrap"><div class="particles"></div><div class="gokou"></div></div>`;
-            } else if(char.rarity === "SSR") {
+            if (char.rarity === "UR") {
+                effectHtml = `<div class="gokou-wrap"><div class="particles"></div><div class="gokou"></div><div class="gokou" style="animation-duration:15s; opacity:0.3; transform:rotate(45deg);"></div></div>`;
+            } else if (char.rarity === "SSR") {
                 effectHtml = `<div class="gokou-wrap"><div class="gokou" style="background: repeating-conic-gradient(from 0deg, transparent 0deg 20deg, rgba(255,255,255,0.1) 20deg 40deg);"></div></div>`;
             }
 
             container.innerHTML = `
                 ${effectHtml}
-                <div class="pickup-card" style="border: 5px solid ${char.rarity==='UR'?'#ff00ff':char.rarity==='SSR'?'#ffd700':char.rarity==='SR'?'#c0c0c0':'#ccc'}">
+                <div class="pickup-card" style="border: 5px solid ${char.rarity === 'UR' ? '#ff00ff' : char.rarity === 'SSR' ? '#ffd700' : char.rarity === 'SR' ? '#c0c0c0' : '#ccc'}">
                     <div style="height:250px; background:${char.color};">
-                        <img src="${char.image}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://placehold.jp/40/${char.color.replace('#','')}/ffffff/300x300.png?text=${char.name}'">
+                        <img src="${char.image}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://placehold.jp/40/${char.color.replace('#', '')}/ffffff/300x300.png?text=${char.name}'">
                     </div>
                     <div style="padding:15px; text-align:left">
                         <div style="color:#e91e63; font-weight:bold;">【${char.rarity}】 ${char.title}</div>
@@ -321,8 +571,9 @@
         function closePickup() {
             document.getElementById("pickup-container").style.display = "none";
             document.getElementById("pickup-container").innerHTML = "";
-            if(resolvePickup) resolvePickup();
+            if (resolvePickup) resolvePickup();
         }
     </script>
 </body>
+
 </html>
